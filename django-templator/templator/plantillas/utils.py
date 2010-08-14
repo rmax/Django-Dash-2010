@@ -13,7 +13,7 @@ def get_context_from_request(request):
         for name in source.keys():
             # variables ending with [] are retrieved as lists
             if name.endswith('[]'):
-                context[name[-2:]] = source.getlist(name)
+                context[name[:-2]] = source.getlist(name)
             else:
                 context[name] = source.get(name)
 
