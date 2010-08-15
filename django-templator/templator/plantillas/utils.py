@@ -1,3 +1,4 @@
+from django import shortcuts
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseServerError
 from django.template.loader import render_to_string
@@ -11,6 +12,13 @@ class JsonResponse(HttpResponse):
         content = simplejson.dumps(data, cls=DjangoJSONEncoder)
         super(JsonResponse, self).__init__(content, mimetype="application/json")
 
+
+def get_object_or_none(klass, *args, **kwargs):
+    queryset = shortcuts._get_queryset(klass)
+    try:
+        return queryset.get(*args, **kwargs)
+    except queryset.model.DoesNotExist:
+        return None
 
 def get_context_from_request(request):
     """
