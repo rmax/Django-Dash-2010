@@ -7,6 +7,8 @@ from django.template.loader import (BaseLoader,
                                     get_template_from_string,
                                     make_origin)
 
+from templator.plantillas.models import Template as TemplateModel
+
 thread_context = threading.local()
 
 @contextlib.contextmanager
@@ -25,22 +27,18 @@ class Loader(BaseLoader):
     def load_template(self, template_name, template_dirs=None):
         source, path = self.load_template_source(template_name, template_dirs)
 
-        collection = self.get_current_collection()
-        if collection:
-            name = '<%s: %s>' % (collection.name, path)
-        else:
-            name = None
-
-        origin = make_origin(name, self.load_template_source, path, None)
-        return get_template_from_string(source, origin, name), None
+        origin = make_origin(path, self.load_template_source, path, None)
+        return get_template_from_string(source, origin, path), None
 
     def load_template_source(self, template_name, template_dirs=None):
-        collection = self.get_current_collection()
+        # fetch template by uuid or content
+        template_uuid = self.get_template_uuid()
         template_content = self.get_template_content()
 
-        if collection:
+        if template_uuid:
             try:
-                tpl = collection.templates.get(path=template_name)
+                tpl = TemplateModel.objects.get(group_uuid=template_uuid,
+                                                path=template_name)
                 return tpl.content, tpl.path
             except ObjectDoesNotExist:
                 pass
@@ -49,8 +47,8 @@ class Loader(BaseLoader):
 
         raise TemplateDoesNotExist
 
-    def get_current_collection(self):
-        return getattr(thread_context, 'collection', None)
+    def get_template_uuid(self):
+        return getattr(thread_context, 'template_uuid', None)
 
     def get_template_content(self):
         return getattr(thread_context, 'template_content', None)
