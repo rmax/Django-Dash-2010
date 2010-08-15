@@ -23,7 +23,7 @@ SITE_ID = 1
 USE_I18N = True
 USE_L10N = True
 
-MEDIA_ROOT = os.path.join(PROJECT_PATH, 'media')
+MEDIA_ROOT = os.path.join(PROJECT_PATH, 'site_media')
 MEDIA_URL = '/site_media/'
 
 ROOT_URLCONF = 'templator.conf.urls'
@@ -35,9 +35,9 @@ TEMPLATE_DIRS = (
 )
 
 TEMPLATE_LOADERS = (
+    'templator.plantillas.loader.Loader',
     'django.template.loaders.filesystem.Loader',
     'django.template.loaders.app_directories.Loader',
-    'templator.plantillas.loader.Loader',
 )
 
 INSTALLED_APPS = (
