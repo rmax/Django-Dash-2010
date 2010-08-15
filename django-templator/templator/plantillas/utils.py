@@ -1,3 +1,5 @@
+import uuid
+
 from django import shortcuts
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseServerError
@@ -57,3 +59,6 @@ def template_to_response(template_name, context=None, request=None):
     else:
         # TODO: get mimetype from template_name
         return HttpResponse(content, mimetype='text/html')
+
+def uuid_hex():
+    return uuid.uuid4().hex

@@ -1,13 +1,19 @@
 import ast
+import itertools
 
+from django.contrib import messages
 from django.http import Http404
-from django.shortcuts import get_object_or_404, redirect
+from django.template import RequestContext
+from django.shortcuts import get_object_or_404, redirect, render_to_response
+from django.utils.translation import ugettext as _
 
 from templator.plantillas import loader
-from templator.plantillas.models import TemplateContext
+from templator.plantillas.forms import TemplateContextForm, TemplateForm
+from templator.plantillas.models import TemplateContext, Template
 from templator.plantillas.utils import (get_context_from_request,
                                         template_to_response,
                                         get_object_or_none,
+                                        uuid_hex,
                                         JsonResponse)
 
 def validate_context(request):
@@ -29,6 +35,95 @@ def validate_context(request):
         data['message'] = "context can't be empty"
 
     return JsonResponse(data)
+
+def template_new(request):
+    """Redirects to template form with new uuid"""
+    uuid = uuid_hex() 
+    return redirect('form', uuid=uuid)
+
+def template_form(request, uuid):
+
+    context = get_object_or_none(TemplateContext,
+                                 group_uuid=uuid) or TemplateContext()
+    if request.POST:
+        context_form = TemplateContextForm(request.POST, prefix='context',
+                                           instance=context)
+
+        # num of templates expected
+        try:
+            num_forms = int(request.POST.get('num_forms'))
+        except ValueError:
+            # at least expect one form
+            num_forms = 1
+
+        template_forms = []
+        for i in range(num_forms):
+            template_forms.append(TemplateForm(request.POST,
+                                               prefix='template_%d' % i))
+
+        all_forms = [context_form] + template_forms
+
+        # trigger is_valid on all forms
+        if all([f.is_valid() for f in all_forms]):
+            # clear old templates
+            Template.objects.filter(group_uuid=uuid).delete()
+
+            obj = context_form.save(commit=False)
+            obj.group_uuid = uuid
+            obj.save()
+
+            for form in template_forms:
+                obj = form.save(commit=False)
+                # only store templates with content
+                if obj.content.strip():
+                    obj.group_uuid = uuid
+                    obj.save()
+
+            # allow ad-hoc ajax request
+            if request.is_ajax():
+                return JsonResponse({'status': 'ok'})
+            else:
+                messages.success(request, _(u"Templates saved"))
+                return redirect('form', uuid=uuid)
+        else:
+            # allow ad-hoc ajax request
+            if request.is_ajax():
+                # TODO: handle/pass form errors to client
+                return JsonResponse({'status': 'error'})
+            else:
+                messages.error(request, _(u"Please correct errors below"))
+    else:
+        # defaults
+        initial_context = {
+            'context': "{'deity': 'pony'}",
+        }
+        initial_template = {
+            'path': 'test.txt',
+            'content': "I have {{ deity }} powers!",
+        }
+
+        context_form = TemplateContextForm(prefix='context', instance=context,
+                                           initial=initial_context)
+
+        template_forms = []
+
+        templates = Template.objects.filter(group_uuid=uuid)
+        if templates:
+            for i, tpl in enumerate(templates):
+                form = TemplateForm(prefix='template_%d' % i, instance=tpl)
+                template_forms.append(form)
+        else:
+            form = TemplateForm(prefix='template_0', initial=initial_template)
+            template_forms.append(form)
+
+        num_forms = len(template_forms)
+
+    return render_to_response('plantillas/form.html', {
+        'uuid': uuid,
+        'num_forms': num_forms,
+        'context_form': context_form,
+        'template_forms': template_forms,
+    }, context_instance=RequestContext(request))
 
 def template_render(request, uuid, path):
     context = get_context(uuid)

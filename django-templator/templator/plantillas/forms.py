@@ -14,9 +14,9 @@ class TemplateContextForm(forms.ModelForm):
         fields = ('context', )
 
     def clean_context(self):
-        context = self.cleaned_data['context']
+        context = self.cleaned_data['context'].strip()
 
-        if context.strip():
+        if context:
             try:
                 data = ast.literal_eval(context)
                 if isinstance(data, dict):
@@ -28,13 +28,13 @@ class TemplateContextForm(forms.ModelForm):
                 message = _(u"you have a syntax error at line %d column %d")
                 raise forms.ValidationError(message % (e.lineno, e.offset))
             except ValueError as e:
-                message = _(u"value error: %s") % e.msg
+                message = _(u"value error: %s") % str(e)
                 raise forms.ValidationError(message)
             except Exception as e:
-                message = _(u"unknown error: %s") % e.msg
+                message = _(u"unknown error: %s") % str(e)
                 raise forms.ValidationError(message)
         else:
-            raise forms.ValidationError(_(u"context required"))
+            return context
 
 
 class TemplateForm(forms.ModelForm):

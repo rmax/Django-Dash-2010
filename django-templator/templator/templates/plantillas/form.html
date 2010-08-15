@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block header_extra %}
+<script type="text/javascript" src="{{ MEDIA_URL }}scripts/jquery.taboverride-1.0.js"></script>
+{% endblock %}
+
+{% block content %}
+<form id="templates-form" action="" method="post">
+<div id="templates">
+    <div id="template-context" class="fieldset">
+        <div class="meta clearfix">
+            <div class="label">
+                <a class="toggle" href="#">Context</a>
+            </div>
+            <div class="desc">
+                <a class="clear" href="#">Clear</a>
+            </div>
+        </div>
+        <div class="input" style="display:none">
+            {{ context_form.context.errors }}
+            {{ context_form.context }}
+            <p>Write a literal dictionary including basic data types: strings,
+            numbers, lists and dicts.<br/>
+            e.g. <code>{"foo": "bar", "bleh": [1, 2, 3]}</code></p>
+        </div>
+    </div>
+
+{% for form in template_forms %}
+    <div class="template fieldset">
+        <div class="meta clearfix">
+            <div class="path label">
+                {{ form.path.errors }}
+                {{ form.path }}
+                <span>e.g. <code>foo.html</code> <code>foo/bar.html</code></span>
+            </div>
+            <div class="desc">
+                <a class="render" href="#">Render</a>
+            </div>
+        </div>
+        <div class="input">
+            <div class="content">
+                {{ form.content.errors }}
+                {{ form.content }}
+            </div>
+            <p>All default template tags and filters are enabled. Empty
+            content will delete the template.</p>
+        </div>
+    </div>
+{% endfor %}
+</div>
+
+<div class="buttons">
+    <button type="submit">Save</button>
+</div>
+
+<div style="display:none">
+    <input type="hidden" name="num_forms" value="{{ num_forms }}" />
+</div>
+{% csrf_token %}
+
+</form>
+
+{% endblock %}
+
+{% block bottom_extra %}
+<script type="text/javascript">
+jQuery(function($) {
+
+    $.fn.tabOverride.setTabSize(4);
+    $("textarea").tabOverride();
+
+    $("#templates .meta input").attr("placeholder", "template path name...")
+
+    $("#template-context a.toggle").click(function() {
+        $(this).parent().parent().next().slideToggle("slow");
+        return false;
+    });
+
+    if ($("#template-context .errorlist").length) {
+        $("#template-context a.toggle").click();
+    }
+
+    $(".template a.render").live("click", function() {
+        var $form = $("#templates-form");
+        var uuid = "{{ uuid }}";
+        var name = $(this).parents(".meta").find("input[type='text']").val();
+        var data = $form.serialize();
+
+        $.fancybox.showActivity();
+
+        $.post(location.href, data, function(response) {
+            if (response.status == "ok") {
+                // perform render
+                var url = "/r/" + uuid + "/" + name
+                var dummy = $("<a/>").fancybox({
+                    height: "90%",
+                    width: "95%",
+                    type: "iframe",
+                    href: url,
+                    title: name
+                });
+                dummy.trigger("click.fb");
+            } else {
+                // an error ocurred. at this time reply with a normal post
+                // to display the errors
+                $form.submit();
+            }
+        });
+        return false;
+    });
+
+});
+</script>
+{% endblock %}
