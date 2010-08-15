@@ -71,6 +71,11 @@ jQuery(function($) {
 
     $("#templates .meta input").attr("placeholder", "template path name...")
 
+    $("#template-context a.clear").click(function() {
+        $(this).parents(".fieldset:first").find("textarea").val("");
+        return false;
+    });
+
     $("#template-context a.toggle").click(function() {
         $(this).parent().parent().next().slideToggle("slow");
         return false;
@@ -91,9 +96,14 @@ jQuery(function($) {
         $.post(location.href, data, function(response) {
             if (response.status == "ok") {
                 // clear any error in the form
-                $form.find("ul.errorlist").each(function() {
-                    $(this).remove();
-                });
+                var $errors = $form.find("ul.errorlist");
+                if ($errors.length) {
+                    $errors.each(function() {
+                        $(this).remove();
+                    });
+                    // remove main message
+                    $("ul.messages").remove();
+                }
 
                 // perform render
                 var url = "/r/" + uuid + "/" + name
