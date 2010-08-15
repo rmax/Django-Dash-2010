@@ -45,6 +45,20 @@ def template_form(request, uuid):
 
     context_obj = get_object_or_none(TemplateContext,
                                  group_uuid=uuid) or TemplateContext()
+    request.session.setdefault('templates', set())
+
+    if Template.objects.filter(group_uuid=uuid).count():
+        uuid_new = False
+    else:
+        uuid_new = True
+
+    if uuid_new or uuid in request.session['templates']:
+        is_owner = True
+    else:
+        is_owner = False
+
+    is_owner = uuid in request.session['templates']
+
     if request.POST:
         context_form = TemplateContextForm(request.POST, prefix='c',
                                            instance=context_obj)
