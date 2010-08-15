@@ -56,7 +56,9 @@ def template_to_response(template_name, context=None, request=None):
     # Loader takes care of which template to load
     # if it fails, use our custom exception reporter without
     # system information, just template-related stuff.
-    context = context or {}
+    if not context:
+        context = {}
+
     try:
         content = render_to_string(template_name, context)
     except:
@@ -64,7 +66,7 @@ def template_to_response(template_name, context=None, request=None):
         import sys
         reporter = ExceptionReporter(request, *sys.exc_info())
         content = reporter.get_traceback_html(strip_frames=4,
-                                              context=context)
+                                              template_context=context)
         return HttpResponseServerError(content, mimetype='text/html')
     else:
         mimetype, encoding = mimetypes.guess_type(template_name)
