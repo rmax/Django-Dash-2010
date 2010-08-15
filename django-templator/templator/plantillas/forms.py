@@ -46,11 +46,11 @@ class TemplateForm(forms.ModelForm):
     def clean_path(self):
         path = self.cleaned_data['path'].strip()
 
-        if not re.search(r'^[A-Za-z/\\._-]+$', path):
+        if not re.search(r'^[A-Za-z0-9/\\._-]+$', path):
             message = _(u"path contains a invalid character")
             raise forms.ValidationError(message)
 
-        if not re.search(r'^[A-Za-z_]', path):
+        if not re.search(r'^[A-Za-z0-9_]', path):
             message = _(u"path must start with a letter or number")
             raise forms.ValidationError(message)
 
