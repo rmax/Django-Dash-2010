@@ -129,6 +129,7 @@ jQuery(function($) {
         var $node = $("#templates").find(".template:last").clone(true);
         $node.appendTo("#templates");
 
+        // update prefixes
         var num = parseInt($node.attr("formnum"));
         var next = num + 1;
         var _prefix_ = "t" + num + "-";
