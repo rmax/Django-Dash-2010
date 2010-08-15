@@ -43,11 +43,11 @@ def template_new(request):
 
 def template_form(request, uuid):
 
-    context = get_object_or_none(TemplateContext,
+    context_obj = get_object_or_none(TemplateContext,
                                  group_uuid=uuid) or TemplateContext()
     if request.POST:
-        context_form = TemplateContextForm(request.POST, prefix='context',
-                                           instance=context)
+        context_form = TemplateContextForm(request.POST, prefix='c',
+                                           instance=context_obj)
 
         # num of templates expected
         try:
@@ -59,7 +59,7 @@ def template_form(request, uuid):
         template_forms = []
         for i in range(num_forms):
             template_forms.append(TemplateForm(request.POST,
-                                               prefix='template_%d' % i))
+                                               prefix='t%d' % i))
 
         all_forms = [context_form] + template_forms
 
@@ -102,7 +102,8 @@ def template_form(request, uuid):
             'content': "I have {{ deity }} powers!",
         }
 
-        context_form = TemplateContextForm(prefix='context', instance=context,
+        context_form = TemplateContextForm(prefix='c',
+                                           instance=context_obj,
                                            initial=initial_context)
 
         template_forms = []
@@ -110,10 +111,10 @@ def template_form(request, uuid):
         templates = Template.objects.filter(group_uuid=uuid)
         if templates:
             for i, tpl in enumerate(templates):
-                form = TemplateForm(prefix='template_%d' % i, instance=tpl)
+                form = TemplateForm(prefix='t%d' % i, instance=tpl)
                 template_forms.append(form)
         else:
-            form = TemplateForm(prefix='template_0', initial=initial_template)
+            form = TemplateForm(prefix='t0', initial=initial_template)
             template_forms.append(form)
 
         num_forms = len(template_forms)

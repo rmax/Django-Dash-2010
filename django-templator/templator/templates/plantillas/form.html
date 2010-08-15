@@ -25,8 +25,8 @@
         </div>
     </div>
 
-{% for form in template_forms %}
-    <div class="template fieldset">
+{% for num, form in template_forms|enumerate %}
+    <div formnum="{{ num }}" class="template fieldset">
         <div class="meta clearfix">
             <div class="path label">
                 {{ form.path.errors }}
@@ -49,7 +49,8 @@
 {% endfor %}
 </div>
 
-<div class="buttons">
+<div id="buttons">
+    <a class="more" href="#">Add another</a>
     <button type="submit">Save</button>
 </div>
 
@@ -124,6 +125,31 @@ jQuery(function($) {
         return false;
     });
 
+    $("#buttons a.more").click(function() {
+        var $node = $("#templates").find(".template:last").clone(true);
+        $node.appendTo("#templates");
+
+        var num = parseInt($node.attr("formnum"));
+        var next = num + 1;
+        var _prefix_ = "t" + num + "-";
+        var _next_ = "t" + next + "-";
+
+        var $input = $node.find("input:first");
+        var $textarea = $node.find("textarea:first");
+
+        $node.attr("formnum", next);
+
+        $input.attr("id", $input.attr("id").replace(_prefix_, _next_));
+        $input.attr("name", $input.attr("name").replace(_prefix_, _next_));
+
+        $textarea.attr("id", $textarea.attr("id").replace(_prefix_, _next_));
+        $textarea.attr("name", $textarea.attr("name").replace(_prefix_, _next_));
+
+        // update counter
+        $("input[name='num_forms']").val(next+1)
+
+        return false;
+    });
 });
 </script>
 {% endblock %}
