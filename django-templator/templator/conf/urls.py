@@ -7,6 +7,7 @@ urlpatterns = patterns('templator.plantillas.views',
     url(r'^r/$', 'anon_template_render', name='anon_render'),
     url(r'^r/(?P<collection_name>\S+)/(?P<template_name>.*)$',
         'template_render', name='render'),
+    url(r'^v/context/$', 'validate_context', name='validate_context'),
 )
 
 urlpatterns += patterns('django.views.generic.simple',
