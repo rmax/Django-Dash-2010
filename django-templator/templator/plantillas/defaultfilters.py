@@ -13,5 +13,9 @@ def unsafepath(value):
 
     return value
 
+def enumerate_(value):
+    return enumerate(value)
+
 register = Library()
 register.filter(unsafepath)
+register.filter('enumerate', enumerate_)
