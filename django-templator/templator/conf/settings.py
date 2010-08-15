@@ -35,9 +35,10 @@ TEMPLATE_DIRS = (
 )
 
 TEMPLATE_LOADERS = (
-    'templator.plantillas.loader.Loader',
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
+    ('templator.plantillas.loader.Loader', (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )),
 )
 
 INSTALLED_APPS = (

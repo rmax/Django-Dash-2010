@@ -1,10 +1,10 @@
 import contextlib
 import threading
 
-from django.db.models import ObjectDoesNotExist
 from django.template import TemplateDoesNotExist
 from django.template.loader import (BaseLoader,
                                     get_template_from_string,
+                                    find_template_loader,
                                     make_origin)
 
 from templator.plantillas.models import Template as TemplateModel
@@ -24,32 +24,44 @@ def set_context(**kwargs):
 class Loader(BaseLoader):
     is_usable = True
 
+    def __init__(self, loaders):
+        self._loaders = loaders
+        self._cached_loaders = []
+
+    @property
+    def loaders(self):
+        if not self._cached_loaders:
+            for loader in self._loaders:
+                self._cached_loaders.append(find_template_loader(loader))
+        return self._cached_loaders
+
     def load_template(self, template_name, template_dirs=None):
-        source, path = self.load_template_source(template_name, template_dirs)
-
-        origin = make_origin(path, self.load_template_source, path, None)
-        return get_template_from_string(source, origin, path), None
-
-    def load_template_source(self, template_name, template_dirs=None):
-        # fetch template by uuid or content
-        template_uuid = self.get_template_uuid()
-        template_content = self.get_template_content()
-
-        if template_uuid:
+        uuid = self.get_template_uuid()
+        if uuid:
+            # load from db only
             try:
-                tpl = TemplateModel.objects.get(group_uuid=template_uuid,
-                                                path=template_name)
-                return tpl.content, tpl.path
-            except ObjectDoesNotExist:
-                pass
-        elif template_content:
-            return template_content, None
+                tpl = TemplateModel.objects.get(group_uuid=uuid, path=template_name)
+            except TemplateModel.DoesNotExist:
+                raise TemplateDoesNotExist(template_name)
+            else:
+                origin = make_origin(tpl.path, self, template_name,
+                                     template_dirs)
+                return tpl.content, origin
+        else:
+            # use normal loaders
+            return self.find_template(template_name, template_dirs)
 
-        raise TemplateDoesNotExist
+    def find_template(self, template_name, template_dirs=None):
+        for loader in self.loaders:
+            try:
+                template, display_name = loader(template_name, template_dirs)
+                origin = make_origin(display_name, loader,
+                                     template_name, template_dirs)
+                return template, origin
+            except TemplateDoesNotExist:
+                pass
+        raise TemplateDoesNotExist(template_name)
 
     def get_template_uuid(self):
         return getattr(thread_context, 'template_uuid', None)
-
-    def get_template_content(self):
-        return getattr(thread_context, 'template_content', None)
 
