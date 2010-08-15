@@ -142,9 +142,11 @@ jQuery(function($) {
 
         $input.attr("id", $input.attr("id").replace(_prefix_, _next_));
         $input.attr("name", $input.attr("name").replace(_prefix_, _next_));
+        $input.val("");
 
         $textarea.attr("id", $textarea.attr("id").replace(_prefix_, _next_));
         $textarea.attr("name", $textarea.attr("name").replace(_prefix_, _next_));
+        $textarea.val("");
 
         // update counter
         $("input[name='num_forms']").val(next+1);
