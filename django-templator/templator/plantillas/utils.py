@@ -1,3 +1,4 @@
+import mimetypes
 import uuid
 
 from django import shortcuts
@@ -7,6 +8,15 @@ from django.template.loader import render_to_string
 from django.utils import simplejson
 
 from templator.plantillas.reporter import ExceptionReporter
+
+
+SAFE_MIMES = (
+    'text/html',
+    'text/plain',
+    'text/css'
+)
+
+DEFAULT_MIME = 'text/plain'
 
 
 class JsonResponse(HttpResponse):
@@ -57,8 +67,11 @@ def template_to_response(template_name, context=None, request=None):
                                               context=context)
         return HttpResponseServerError(content, mimetype='text/html')
     else:
-        # TODO: get mimetype from template_name
-        return HttpResponse(content, mimetype='text/html')
+        mimetype, encoding = mimetypes.guess_type(template_name)
+        if mimetype not in SAFE_MIMES:
+            mimetype = DEFAULT_MIME
+
+        return HttpResponse(content, mimetype=mimetype)
 
 def uuid_hex():
     return uuid.uuid4().hex
