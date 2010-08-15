@@ -20,8 +20,8 @@ TIME_ZONE = 'America/La_Paz'
 
 SITE_ID = 1
 
-USE_I18N = True
-USE_L10N = True
+USE_I18N = False
+USE_L10N = False
 
 MEDIA_ROOT = os.path.join(PROJECT_PATH, 'site_media')
 MEDIA_URL = '/site_media/'
@@ -50,3 +50,7 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'templator.plantillas',
 )
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+MESSAGE_STORAGE = 'django.contrib.messages.storage.cookie.CookieStorage'
+SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'
