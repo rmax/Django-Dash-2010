@@ -4,7 +4,15 @@ from django.contrib import admin
 admin.autodiscover()
 
 urlpatterns = patterns('templator.plantillas.views',
-    url(r'render/(?P<collection_name>\S+)/(?P<template_name>.*)', 'template_render', name='render'),
+    url(r'^r/$', 'anon_template_render', name='anon_render'),
+    url(r'^r/(?P<collection_name>\S+)/(?P<template_name>.*)$',
+        'template_render', name='render'),
+)
+
+urlpatterns += patterns('django.views.generic.simple',
+    url(r'^$', 'direct_to_template', {
+        'template': 'index.html',
+    }, name='index'),
 )
 
 urlpatterns += patterns('',
