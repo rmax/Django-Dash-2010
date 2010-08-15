@@ -1,7 +1,16 @@
+from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseServerError
 from django.template.loader import render_to_string
+from django.utils import simplejson
 
 from templator.plantillas.reporter import ExceptionReporter
+
+
+class JsonResponse(HttpResponse):
+    def __init__(self, data):
+        content = simplejson.dumps(data, cls=DjangoJSONEncoder)
+        super(JsonResponse, self).__init__(content, mimetype="application/json")
+
 
 def get_context_from_request(request):
     """
