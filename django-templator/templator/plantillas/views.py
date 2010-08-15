@@ -145,6 +145,24 @@ def template_render(request, uuid, path):
     with loader.set_context(template_uuid=uuid):
         return template_to_response(path, context, request=request)
 
+def template_copy(request, uuid):
+    new_uuid = uuid_hex()
+    obj = get_object_or_none(TemplateContext, group_uuid=uuid)
+    templates = Template.objects.filter(group_uuid=uuid)
+
+    if obj and templates:
+        TemplateContext.objects.create(group_uuid=new_uuid,
+                                       context=obj.context)
+        for t in templates:
+            Template.objects.create(group_uuid=new_uuid, path=t.path,
+                                    content=t.content)
+
+        messages.success(request, _(u"Template copied successfully"))
+        return redirect('form', uuid=new_uuid)
+    else:
+        messages.error(request, _(u"Template not found"))
+        return redirect('/')
+
 def get_context(uuid):
     obj = get_object_or_none(TemplateContext, group_uuid=uuid)
     if obj and obj.context:
