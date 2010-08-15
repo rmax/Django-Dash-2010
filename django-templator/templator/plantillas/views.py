@@ -35,9 +35,9 @@ def anon_template_render(request):
     template_name = context.pop('__name__', '__name__')
     template_content = context.pop('__content__', '')
 
-    if template_name and template_content:
-        loader.set_context(template_content=template_content)
-        return template_to_response(template_name, context, request=request)
+    if template_content:
+        with loader.set_context(template_content=template_content):
+            return template_to_response(template_name, context, request=request)
     else:
         return redirect('/')
 
@@ -48,7 +48,6 @@ def template_render(request, collection_name, template_name):
         raise Http404
 
     # store collection in loader's thread local context
-    loader.set_context(collection=collection)
-
     context = get_context_from_request(request)
-    return template_to_response(template_name, context, request=request)
+    with loader.set_context(collection=collection):
+        return template_to_response(template_name, context, request=request)

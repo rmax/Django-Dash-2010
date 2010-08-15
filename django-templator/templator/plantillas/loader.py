@@ -1,3 +1,4 @@
+import contextlib
 import threading
 
 from django.db.models import ObjectDoesNotExist
@@ -8,8 +9,15 @@ from django.template.loader import (BaseLoader,
 
 thread_context = threading.local()
 
+@contextlib.contextmanager
 def set_context(**kwargs):
-    thread_context.__dict__.update(kwargs)
+    try:
+        thread_context.__dict__.update(kwargs)
+        yield
+    finally:
+        for k in kwargs:
+            thread_context.__dict__.pop(k, None)
+
 
 class Loader(BaseLoader):
     is_usable = True
