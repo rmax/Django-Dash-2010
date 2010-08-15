@@ -90,6 +90,11 @@ jQuery(function($) {
 
         $.post(location.href, data, function(response) {
             if (response.status == "ok") {
+                // clear any error in the form
+                $form.find("ul.errorlist").each(function() {
+                    $(this).remove();
+                });
+
                 // perform render
                 var url = "/r/" + uuid + "/" + name
                 var dummy = $("<a/>").fancybox({
