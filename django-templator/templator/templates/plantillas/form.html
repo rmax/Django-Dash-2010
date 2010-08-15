@@ -146,10 +146,11 @@ jQuery(function($) {
         $textarea.attr("name", $textarea.attr("name").replace(_prefix_, _next_));
 
         // update counter
-        $("input[name='num_forms']").val(next+1)
+        $("input[name='num_forms']").val(next+1);
 
         return false;
     });
+
 });
 </script>
 {% endblock %}
