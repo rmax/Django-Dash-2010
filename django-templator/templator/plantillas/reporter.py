@@ -4,8 +4,8 @@ from django.utils.encoding import smart_unicode
 from django.views import debug
 
 class ExceptionReporter(debug.ExceptionReporter):
-    def get_traceback_html(self, strip_frames=0, context=None):
-        "Return HTML code for traceback."
+    def get_traceback_html(self, strip_frames=0, template_context=None):
+        """Return HTML code for traceback."""
         # duplicate code from original ExceptionReporter
         if (settings.TEMPLATE_DEBUG and hasattr(self.exc_value, 'source') and
             isinstance(self.exc_value, TemplateSyntaxError)):
@@ -33,7 +33,7 @@ class ExceptionReporter(debug.ExceptionReporter):
             'request': self.request,
             'template_info': self.template_info,
             'template_does_not_exist': self.template_does_not_exist,
-            'context': context,
+            'context': template_context,
         })
 
         return t.render(c)
