@@ -63,7 +63,7 @@ def template_to_response(template_name, context=None, request=None):
         # request is needed just in exception case
         import sys
         reporter = ExceptionReporter(request, *sys.exc_info())
-        content = reporter.get_traceback_html(strip_frames=5,
+        content = reporter.get_traceback_html(strip_frames=4,
                                               context=context)
         return HttpResponseServerError(content, mimetype='text/html')
     else:

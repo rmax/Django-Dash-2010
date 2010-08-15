@@ -12,7 +12,7 @@ class ExceptionReporter(debug.ExceptionReporter):
             self.get_template_exception_info()
 
         frames = self.get_traceback_frames()
-        if strip_frames:
+        if strip_frames and len(frames) > strip_frames:
             frames = frames[strip_frames:]
 
         unicode_hint = ''
