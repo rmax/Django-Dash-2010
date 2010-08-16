@@ -54,6 +54,10 @@ body {
     font-family: helvetica, arial, freesans, clean, sans-serif;
 }
 
+a {
+    text-decoration: None;
+}
+
 .error, .notice, .success {
     padding: .8em;
     margin-bottom: 1em;
