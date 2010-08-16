@@ -109,12 +109,35 @@ def template_form(request, uuid):
     else:
         # defaults
         initial_context = {
-            'context': "{'deity': 'pony'}",
+            'context': "{'deity': 'pony', 'times': [1, 2, 3, 4]}",
         }
-        initial_template = {
+        initial_t0 = {
             'path': 'test.txt',
             'content': "I have {{ deity }} powers!",
         }
+        initial_t1 = {
+            'path': 'include.txt',
+            'content': """
+{% extends "base.txt" %}
+{% block content %}
+    {% for n in times %}
+        time: {{ n }}
+        {% include "test.txt" %}
+    {% endfor %}
+{% endblock %}""",
+}
+        initial_t2 = {
+            'path': 'base.txt',
+            'content': """
+Django Dash Templator
+
+{% block content %}
+{% endblock %}
+
+darkrho (c) 2010
+    """,
+        }
+
 
         context_form = TemplateContextForm(prefix='c',
                                            instance=context_obj,
@@ -128,7 +151,11 @@ def template_form(request, uuid):
                 form = TemplateForm(prefix='t%d' % i, instance=tpl)
                 template_forms.append(form)
         else:
-            form = TemplateForm(prefix='t0', initial=initial_template)
+            form = TemplateForm(prefix='t0', initial=initial_t0)
+            template_forms.append(form)
+            form = TemplateForm(prefix='t1', initial=initial_t1)
+            template_forms.append(form)
+            form = TemplateForm(prefix='t2', initial=initial_t2)
             template_forms.append(form)
 
         num_forms = len(template_forms)
