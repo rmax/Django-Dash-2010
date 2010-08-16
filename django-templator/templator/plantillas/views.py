@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import ast
 import itertools
 
@@ -139,7 +140,16 @@ Django Dash Templator
 darkrho (c) 2010
     """,
         }
+        initial_t3 = {
+            'path': 'fail.txt',
+            'content': """
+Show me exception:
 
+    {% foo %}
+
+«{{ deity }} in action»
+    """,
+        }
 
         context_form = TemplateContextForm(prefix='c',
                                            instance=context_obj,
@@ -158,6 +168,8 @@ darkrho (c) 2010
             form = TemplateForm(prefix='t1', initial=initial_t1)
             template_forms.append(form)
             form = TemplateForm(prefix='t2', initial=initial_t2)
+            template_forms.append(form)
+            form = TemplateForm(prefix='t3', initial=initial_t3)
             template_forms.append(form)
 
         num_forms = len(template_forms)
