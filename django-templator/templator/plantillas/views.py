@@ -43,8 +43,10 @@ def template_new(request):
 
 def template_form(request, uuid):
 
-    context_obj = get_object_or_none(TemplateContext,
-                                 group_uuid=uuid) or TemplateContext()
+    context_obj = get_object_or_none(TemplateContext, group_uuid=uuid)
+    if not context_obj:
+        context_obj = TemplateContext(group_uuid=uuid)
+
     request.session.setdefault('templates', set())
 
     if Template.objects.filter(group_uuid=uuid).count():
